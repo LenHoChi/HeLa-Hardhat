@@ -1,4 +1,4 @@
-package bank
+package blockchain
 
 import (
 	"log"
@@ -13,8 +13,11 @@ import (
 
 const (
 	RpcURL          = "https://666888.rpc.thirdweb.com"
-	ContractAddress = "0x8a191B6D92FDB9A75EDb3cBeB6e78105d44B2822"
+	ContractAddress = "0x85933342B34ceB2ef5ECc63FEC7659c4a3495d6F"
+	WssURL          = "wss://testnet-rpc.helachain.com"
 )
+
+const ()
 
 var (
 	Client       *ethclient.Client

@@ -1,7 +1,7 @@
 package bank
 
 import (
-	"hela-bank-sc/internal/bank"
+	bank "hela-bank-sc/internal/blockchain"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -17,4 +17,12 @@ func (s *impl) Deposit(amount float64) (common.Hash, error) {
 
 func (s *impl) Withdraw(amount float64) (common.Hash, error) {
 	return bank.Withdraw(amount)
+}
+
+func (s *impl) EmergencyWithdraw() (common.Hash, error) {
+	return bank.EmergencyWithdraw()
+}
+
+func (s *impl) GetContractBalance() (*big.Int, error) {
+	return bank.GetContractBalance()
 }

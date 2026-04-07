@@ -30,6 +30,11 @@ describe("SimpleBank", function () {
     expect(await bank.getBalance(user1.address)).to.equal(
       hre.ethers.parseEther("0.5")
     );
+    /*
+      balances[msg.sender] -= amount; → **Trừ** số tiền `amount` trong sổ kế toán của người gọi hàm. -> địa chỉ ví
+      this ở đây là test (vì gọi từ test) (neu la vi thi la dia chi vi)
+      => don gian la kiem tra so luong tien trong vi co bị trừ sau khi withdraw ko thôi
+    */
   });
 
   it("should emergency withdraw", async function () {
@@ -37,8 +42,16 @@ describe("SimpleBank", function () {
 
     await bank.connect(user1).deposit({ value: hre.ethers.parseEther("1") });
     await bank.connect(owner).emergencyWithdraw();
-
+    // Kiểm tra balance của CONTRACT = 0  
     expect(await hre.ethers.provider.getBalance(bank.target)).to.equal(0);
+    // uint balance = address(this).balance; → Đọc tổng ETH đang có trong contract SimpleBank, lưu vào biến balance.
+    // msg.sender.call{value: balance}(""); → **Gửi** toàn bộ ETH đó về địa chỉ người gọi hàm (`owner`). => contract = 0
+
+    // // balances[] không bị đụng → không đổi => có vấn đề vì mapping luôn giữ số balance cũ
+    // nên khi gọi func getMyBalance ko chính xác, phải gọi getContractBalance
+    // → KHÔNG đo bằng getBalance được
+    // → phải đo bằng address(bank).balance ✅ - so tien cua contract hien co
+    // đơn giản kiểm tra contract đã về 0 chưa, ko dùng this vì this lúc này là test (wallet - ng gọi), nó phải có hết số tiền từ contract - vì vửa rút
   });
 });
 

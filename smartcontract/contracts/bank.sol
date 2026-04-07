@@ -4,6 +4,7 @@ pragma solidity ^0.8.0;
 contract SimpleBank {
 
     mapping(address => uint) public balances; // address = key, unit = value
+    address[] public depositors;
 
     address public owner;
 
@@ -28,6 +29,9 @@ contract SimpleBank {
 
     // deposit contract
     function deposit() public payable {// payable - allow receive money
+        if(balances[msg.sender] == 0) {
+            depositors.push(msg.sender);  // ← lưu address
+        }
         // require(msg.value > 0, "Amount must be greater than 0");
         if (msg.value <= 0) revert InvalidAmount();
         balances[msg.sender] += msg.value; // map [sender] = value / sender = address - calller
@@ -62,7 +66,13 @@ contract SimpleBank {
     function emergencyWithdraw() public onlyOwner {
         uint balance = address(this).balance;
 
-        (bool success, ) = msg.sender.call{value: balance}("");
+        // ← reset toàn bộ mapping
+        for(uint i = 0; i < depositors.length; i++) {
+            balances[depositors[i]] = 0;
+        }
+        delete depositors;  // ← xóa danh sách
+
+        (bool success, ) = msg.sender.call{value: balance}(""); // send all hlu to meta mask
         // require(success, "Transfer failed");
         if(!success) revert TransferFailed();
 

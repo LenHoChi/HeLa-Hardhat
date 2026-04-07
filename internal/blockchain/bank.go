@@ -1,4 +1,4 @@
-package bank
+package blockchain
 
 import (
 	"context"
@@ -68,6 +68,29 @@ func Withdraw(amountEther float64) (common.Hash, error) {
 	}
 	fmt.Printf("✅ Withdraw %.2f ETH — tx: %s\n", amountEther, tx.Hash().Hex())
 	return tx.Hash(), nil
+}
+
+func EmergencyWithdraw() (common.Hash, error) {
+	auth := GetAuth()
+
+	data, err := ParsedABI.Pack("emergencyWithdraw")
+	if err != nil {
+		return common.Hash{}, err
+	}
+	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
+		RawTransact(auth, data)
+	if err != nil {
+		return common.Hash{}, err
+	}
+	return tx.Hash(), nil
+}
+
+func GetContractBalance() (*big.Int, error) {
+	balance, err := Client.BalanceAt(context.Background(), ContractAddr, nil)
+	if err != nil {
+		return nil, err
+	}
+	return balance, nil
 }
 
 func PrintBalance(userAddr common.Address) {
