@@ -1,6 +1,7 @@
 package router
 
 import (
+	"context"
 	"hela-bank-sc/internal/handler"
 	"hela-bank-sc/internal/service/bank"
 
@@ -9,49 +10,29 @@ import (
 )
 
 type Router struct {
-	bankHandler *handler.BankHandler
+	Ctx     context.Context
+	BankSvc bank.Service
 }
 
-func NewRouter(bankSvc bank.Service) chi.Router {
-	router := &Router{
-		bankHandler: handler.NewBankHandler(bankSvc),
-	}
-
-	// other way:
-	// handler := 	NewBankHandler(bankSvc)
+func (rtr Router) Routes() chi.Router {
+	// at router: create handler to call svc func (that's why need create svc from main and inject them in struct - will use these svc here)
+	// flow: main > router > handler > svc
+	handler := handler.NewBankHandler(rtr.BankSvc)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
-	r.Get("/balance/{address}", router.bankHandler.GetBalance())
-	// r.Get("/balance/{address}", handler.GetBalance())
+	r.Get("/balance/{address}", handler.GetBalance())
 
-	r.Post("/deposit", router.bankHandler.Deposit())
-	r.Post("/withdraw", router.bankHandler.Withdraw())
+	// 1 coin = 1 000 000 000 000 000 000 wei (10^18)
+	r.Post("/deposit", handler.Deposit())
 
-	r.Post("/emergency-withdraw", router.bankHandler.EmergencyWithdraw())
+	r.Post("/withdraw", handler.Withdraw())
 
-	r.Get("/contract-balance", router.bankHandler.GetContractBalance())
+	r.Post("/emergency-withdraw", handler.EmergencyWithdraw())
+
+	r.Get("/contract-balance", handler.GetContractBalance())
 
 	return r
 }
-
-// deposit(1) đang được hiểu là 1 ETH theo đơn vị wei = 10^18
-//   =      1,000,000,000,000,000,000
-// 1 coin = 1 000 000 000 000 000 000 wei
-
-// func NewRouter() chi.Router {
-// 	r := chi.NewRouter()
-// 	r.Use(middleware.Logger)
-// 	r.Use(middleware.Recoverer)
-
-// 	r.Get("/balance/{address}", GetBalance)
-// 	// deposit(1) đang được hiểu là 1 ETH theo đơn vị wei = 10^18
-// 	//   =      1,000,000,000,000,000,000
-// 	// 1 coin = 1 000 000 000 000 000 000 wei
-// 	r.Post("/deposit", Deposit)
-// 	r.Post("/withdraw", Withdraw)
-
-// 	return r
-// }

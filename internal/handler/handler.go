@@ -6,6 +6,6 @@ type BankHandler struct {
 	bankSvc bank.Service
 }
 
-func NewBankHandler(banksvc bank.Service) *BankHandler {
-	return &BankHandler{bankSvc: banksvc}
+func NewBankHandler(banksvc bank.Service) BankHandler {
+	return BankHandler{bankSvc: banksvc}
 }

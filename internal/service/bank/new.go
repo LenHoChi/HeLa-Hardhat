@@ -1,7 +1,13 @@
 package bank
 
-type impl struct{}
+import "hela-bank-sc/internal/repository/transaction"
 
-func New() Service {
-	return &impl{}
+type impl struct {
+	txRepo transaction.Repository
+}
+
+func New(txRepo transaction.Repository) Service {
+	return impl{
+		txRepo: txRepo,
+	}
 }

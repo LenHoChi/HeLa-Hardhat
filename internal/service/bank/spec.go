@@ -1,6 +1,7 @@
 package bank
 
 import (
+	"context"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -8,8 +9,8 @@ import (
 
 type Service interface {
 	GetBalance(addr common.Address) (*big.Int, error)
-	Deposit(amount float64) (common.Hash, error)
-	Withdraw(amount float64) (common.Hash, error)
-	EmergencyWithdraw() (common.Hash, error)
+	Deposit(ctx context.Context, amount float64) (common.Hash, error)
+	Withdraw(ctx context.Context, amount float64) (common.Hash, error)
+	EmergencyWithdraw(ctx context.Context) (common.Hash, error)
 	GetContractBalance() (*big.Int, error)
 }
