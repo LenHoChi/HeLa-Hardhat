@@ -2,12 +2,10 @@ package bank
 
 import (
 	"context"
+	"hela-bank-sc/internal/models"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-
-	"hela-bank-sc/internal/blockchain"
-	"hela-bank-sc/internal/models"
 )
 
 func (s impl) GetBalance(addr common.Address) (*big.Int, error) {
@@ -41,7 +39,7 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 	}
 
 	err = s.txRepo.Create(ctx,
-		blockchain.FromAddr.Hex(),
+		s.chain.FromAddress(),
 		"withdraw",
 		amountWei.String(),
 		txHash.Hex(),
@@ -66,7 +64,7 @@ func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 	}
 
 	err = s.txRepo.Create(ctx,
-		blockchain.FromAddr.Hex(),
+		s.chain.FromAddress(),
 		"emergency_withdraw",
 		contractBalance.String(),
 		txHash.Hex(),

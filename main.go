@@ -4,7 +4,9 @@ import (
 	"context"
 	"fmt"
 	"hela-bank-sc/internal/blockchain"
-	bank "hela-bank-sc/internal/blockchain"
+	clientpkg "hela-bank-sc/internal/blockchain/client"
+	blockchainevent "hela-bank-sc/internal/blockchain/event"
+	txpkg "hela-bank-sc/internal/blockchain/transaction"
 	"hela-bank-sc/internal/database"
 	"hela-bank-sc/internal/httpserver"
 	"hela-bank-sc/internal/repository/transaction"
@@ -15,8 +17,8 @@ import (
 )
 
 func main() {
-	bank.Init()
-	bank.InitWallet()
+	clientpkg.Init()
+	txpkg.InitWallet()
 	fmt.Println("✅ Setup done")
 
 	dbConn, err := database.New()
@@ -27,7 +29,7 @@ func main() {
 
 	// Start listening events in background
 	ctx := context.Background()
-	go bank.ListenEventsExplorer(ctx)
+	go blockchainevent.ListenExplorer(ctx)
 
 	txRepo := transaction.New(dbConn.DB)
 	chainGateway := blockchain.New()

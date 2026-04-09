@@ -2,7 +2,7 @@ package handler
 
 import (
 	"encoding/json"
-	bank "hela-bank-sc/internal/blockchain"
+	txpkg "hela-bank-sc/internal/blockchain/transaction"
 	"net/http"
 	"time"
 
@@ -87,7 +87,7 @@ func (h BankHandler) Deposit() http.HandlerFunc {
 			return
 		}
 
-		go bank.WaitForTx(txHash)
+		go txpkg.WaitForTx(txHash)
 
 		writeJSON(w, http.StatusOK, Response{
 			Success: true,
@@ -120,7 +120,7 @@ func (h BankHandler) Withdraw() http.HandlerFunc {
 			return
 		}
 
-		go bank.WaitForTx(txHash)
+		go txpkg.WaitForTx(txHash)
 
 		writeJSON(w, http.StatusOK, Response{
 			Success: true,

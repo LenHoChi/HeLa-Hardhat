@@ -3,6 +3,8 @@ package blockchain
 import (
 	"context"
 	"fmt"
+	clientpkg "hela-bank-sc/internal/blockchain/client"
+	txpkg "hela-bank-sc/internal/blockchain/transaction"
 	"log"
 	"math/big"
 
@@ -12,12 +14,12 @@ import (
 )
 
 func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
-	data, err := ParsedABI.Pack("getBalance", userAddr) // paste address to check balance
+	data, err := clientpkg.ParsedABI.Pack("getBalance", userAddr) // paste address to check balance
 	if err != nil {
 		return nil, err
 	}
-	result, err := Client.CallContract(context.Background(), ethereum.CallMsg{
-		To:   &ContractAddr,
+	result, err := clientpkg.Client.CallContract(context.Background(), ethereum.CallMsg{
+		To:   &clientpkg.ContractAddr,
 		Data: data,
 	}, nil)
 	if err != nil {
@@ -28,7 +30,7 @@ func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
 }
 
 func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
-	auth := GetAuth()
+	auth := txpkg.GetAuth()
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
 		big.NewFloat(1e18),
@@ -36,11 +38,11 @@ func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
 	amountWei, _ := amount.Int(nil)
 	auth.Value = amountWei
 
-	data, err := ParsedABI.Pack("deposit")
+	data, err := clientpkg.ParsedABI.Pack("deposit")
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
-	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -50,18 +52,18 @@ func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
 }
 
 func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
-	auth := GetAuth()
+	auth := txpkg.GetAuth()
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
 		big.NewFloat(1e18),
 	)
 	amountWei, _ := amount.Int(nil)
 
-	data, err := ParsedABI.Pack("withdraw", amountWei)
+	data, err := clientpkg.ParsedABI.Pack("withdraw", amountWei)
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
-	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -71,13 +73,13 @@ func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
 }
 
 func (g gateway) EmergencyWithdraw() (common.Hash, error) {
-	auth := GetAuth()
+	auth := txpkg.GetAuth()
 
-	data, err := ParsedABI.Pack("emergencyWithdraw")
+	data, err := clientpkg.ParsedABI.Pack("emergencyWithdraw")
 	if err != nil {
 		return common.Hash{}, err
 	}
-	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, err
@@ -86,7 +88,7 @@ func (g gateway) EmergencyWithdraw() (common.Hash, error) {
 }
 
 func (g gateway) GetContractBalance() (*big.Int, error) {
-	balance, err := Client.BalanceAt(context.Background(), ContractAddr, nil)
+	balance, err := clientpkg.Client.BalanceAt(context.Background(), clientpkg.ContractAddr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +96,7 @@ func (g gateway) GetContractBalance() (*big.Int, error) {
 }
 
 func (g gateway) FromAddress() string {
-	return FromAddr.Hex()
+	return txpkg.FromAddress()
 }
 
 func PrintBalance(userAddr common.Address) {

@@ -1,9 +1,10 @@
-package blockchain
+package event
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	clientpkg "hela-bank-sc/internal/blockchain/client"
 	"io"
 	"log"
 	"net/http"
@@ -29,12 +30,10 @@ type ExplorerResponse struct {
 	Items []ExplorerLog `json:"items"`
 }
 
-func ListenEventsExplorer(ctx context.Context) {
+func ListenExplorer(ctx context.Context) {
 	fmt.Println("👂 Listening to events via Explorer API...")
 
-	// Lấy block hiện tại làm điểm bắt đầu
-	// → chỉ lắng nghe events MỚI từ lúc server start
-	latestBlock, err := Client.BlockNumber(ctx)
+	latestBlock, err := clientpkg.Client.BlockNumber(ctx)
 	if err != nil {
 		log.Println("Cannot get latest block:", err)
 		latestBlock = 0
@@ -69,7 +68,7 @@ func ListenEventsExplorer(ctx context.Context) {
 }
 
 func fetchLogs() ([]ExplorerLog, error) {
-	url := explorerAPI + ContractAddr.Hex() + "/logs"
+	url := explorerAPI + clientpkg.ContractAddr.Hex() + "/logs"
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -93,16 +92,14 @@ func handleExplorerEvent(item ExplorerLog) {
 	amount := getParam(item.Decoded.Parameters, "amount")
 
 	switch {
-	case strings.Contains(method, "EmergencyWithdrawn"): // ← check trước
+	case strings.Contains(method, "EmergencyWithdrawn"):
 		owner := getParam(item.Decoded.Parameters, "owner")
 		fmt.Printf("🚨 EmergencyWithdrawn — owner: %s, amount: %s wei | tx: %s\n",
 			owner, amount, item.TxHash)
-
 	case strings.Contains(method, "Deposited"):
 		user := getParam(item.Decoded.Parameters, "user")
 		fmt.Printf("📥 Deposited — user: %s, amount: %s wei | tx: %s\n",
 			user, amount, item.TxHash)
-
 	case strings.Contains(method, "Withdrawn"):
 		user := getParam(item.Decoded.Parameters, "user")
 		fmt.Printf("📤 Withdrawn — user: %s, amount: %s wei | tx: %s\n",

@@ -1,4 +1,4 @@
-package blockchain
+package client
 
 import (
 	"log"
@@ -17,8 +17,6 @@ const (
 	WssURL          = "wss://testnet-rpc.helachain.com"
 )
 
-const ()
-
 var (
 	Client       *ethclient.Client
 	ParsedABI    abi.ABI
@@ -26,26 +24,22 @@ var (
 )
 
 func Init() {
-	// Load .env
 	godotenv.Load()
 
-	// Kết nối RPC
 	var err error
-	Client, err = ethclient.Dial(RpcURL) // connect to HeLa testnet by rpcURL
+	Client, err = ethclient.Dial(RpcURL)
 	if err != nil {
 		log.Fatal("Cannot connect to RPC:", err)
 	}
 
-	// Load ABI
-	abiFile, err := os.ReadFile("abi/bank.json") // load ABI (ABI = all scenario deployed contract)
+	abiFile, err := os.ReadFile("abi/bank.json")
 	if err != nil {
 		log.Fatal("Cannot read ABI:", err)
 	}
-	ParsedABI, err = abi.JSON(strings.NewReader(string(abiFile))) // parse file to json
+	ParsedABI, err = abi.JSON(strings.NewReader(string(abiFile)))
 	if err != nil {
 		log.Fatal("Cannot parse ABI:", err)
 	}
 
-	// Set contract address
 	ContractAddr = common.HexToAddress(ContractAddress)
 }
