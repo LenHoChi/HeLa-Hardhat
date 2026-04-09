@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"hela-bank-sc/internal/blockchain"
 	bank "hela-bank-sc/internal/blockchain"
 	"hela-bank-sc/internal/database"
 	"hela-bank-sc/internal/httpserver"
@@ -29,8 +30,9 @@ func main() {
 	go bank.ListenEventsExplorer(ctx)
 
 	txRepo := transaction.New(dbConn.DB)
+	chainGateway := blockchain.New()
 
-	bankSvc := banksvc.New(txRepo)
+	bankSvc := banksvc.New(txRepo, chainGateway)
 	rtr, err := initRouter(ctx, bankSvc)
 	if err != nil {
 		log.Fatal(err)

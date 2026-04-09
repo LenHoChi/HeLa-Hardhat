@@ -11,7 +11,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func GetBalance(userAddr common.Address) (*big.Int, error) {
+func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
 	data, err := ParsedABI.Pack("getBalance", userAddr) // paste address to check balance
 	if err != nil {
 		return nil, err
@@ -27,7 +27,7 @@ func GetBalance(userAddr common.Address) (*big.Int, error) {
 	return balance, nil
 }
 
-func Deposit(amountEther float64) (common.Hash, error) {
+func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
 	auth := GetAuth()
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
@@ -38,18 +38,18 @@ func Deposit(amountEther float64) (common.Hash, error) {
 
 	data, err := ParsedABI.Pack("deposit")
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, nil, err
 	}
 	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
 		RawTransact(auth, data)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, nil, err
 	}
 	fmt.Printf("✅ Deposit %.2f ETH — tx: %s\n", amountEther, tx.Hash().Hex())
-	return tx.Hash(), nil
+	return tx.Hash(), amountWei, nil
 }
 
-func Withdraw(amountEther float64) (common.Hash, error) {
+func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
 	auth := GetAuth()
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
@@ -59,18 +59,18 @@ func Withdraw(amountEther float64) (common.Hash, error) {
 
 	data, err := ParsedABI.Pack("withdraw", amountWei)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, nil, err
 	}
 	tx, err := bind.NewBoundContract(ContractAddr, ParsedABI, Client, Client, Client).
 		RawTransact(auth, data)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, nil, err
 	}
 	fmt.Printf("✅ Withdraw %.2f ETH — tx: %s\n", amountEther, tx.Hash().Hex())
-	return tx.Hash(), nil
+	return tx.Hash(), amountWei, nil
 }
 
-func EmergencyWithdraw() (common.Hash, error) {
+func (g gateway) EmergencyWithdraw() (common.Hash, error) {
 	auth := GetAuth()
 
 	data, err := ParsedABI.Pack("emergencyWithdraw")
@@ -85,7 +85,7 @@ func EmergencyWithdraw() (common.Hash, error) {
 	return tx.Hash(), nil
 }
 
-func GetContractBalance() (*big.Int, error) {
+func (g gateway) GetContractBalance() (*big.Int, error) {
 	balance, err := Client.BalanceAt(context.Background(), ContractAddr, nil)
 	if err != nil {
 		return nil, err
@@ -93,8 +93,13 @@ func GetContractBalance() (*big.Int, error) {
 	return balance, nil
 }
 
+func (g gateway) FromAddress() string {
+	return FromAddr.Hex()
+}
+
 func PrintBalance(userAddr common.Address) {
-	balance, err := GetBalance(userAddr)
+	gw := gateway{}
+	balance, err := gw.GetBalance(userAddr)
 	if err != nil {
 		log.Println("Cannot get balance:", err)
 		return

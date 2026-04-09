@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	bank "hela-bank-sc/internal/blockchain"
 	"net/http"
+	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/go-chi/chi/v5"
@@ -21,6 +22,24 @@ type Response struct {
 	Success bool   `json:"success"`
 	Message string `json:"message"`
 	Data    any    `json:"data,omitempty"`
+}
+
+type HistoryItem struct {
+	Address   string    `json:"address"`
+	Action    string    `json:"action"`
+	Amount    string    `json:"amount"`
+	TxHash    string    `json:"tx_hash"`
+	Status    string    `json:"status"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+func (h BankHandler) CheckHealth() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		writeJSON(w, http.StatusOK, Response{
+			Success: true,
+			Message: "Check health ok",
+		})
+	}
 }
 
 func (h BankHandler) GetBalance() http.HandlerFunc {
@@ -152,6 +171,49 @@ func (h BankHandler) GetContractBalance() http.HandlerFunc {
 			Message: "Get contract balance successfully",
 			Data: map[string]string{
 				"balance": balance.String(),
+			},
+		})
+	}
+}
+
+func (h BankHandler) GetHistory() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		address := chi.URLParam(r, "address")
+		if !common.IsHexAddress(address) {
+			writeJSON(w, http.StatusBadRequest, Response{
+				Success: false,
+				Message: "Invalid address",
+			})
+			return
+		}
+
+		histories, err := h.bankSvc.GetHistory(r.Context(), address)
+		if err != nil {
+			writeJSON(w, http.StatusInternalServerError, Response{
+				Success: false,
+				Message: "Cannot get history: " + err.Error(),
+			})
+			return
+		}
+
+		items := make([]HistoryItem, 0, len(histories))
+		for _, item := range histories {
+			items = append(items, HistoryItem{
+				Address:   item.Address,
+				Action:    item.Action,
+				Amount:    item.Amount.String(),
+				TxHash:    item.TXHash,
+				Status:    item.Status,
+				CreatedAt: item.CreatedAt,
+			})
+		}
+
+		writeJSON(w, http.StatusOK, Response{
+			Success: true,
+			Message: "Get history successfully",
+			Data: map[string]any{
+				"address": address,
+				"items":   items,
 			},
 		})
 	}

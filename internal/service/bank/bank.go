@@ -2,28 +2,28 @@ package bank
 
 import (
 	"context"
-	"hela-bank-sc/internal/blockchain"
-	bank "hela-bank-sc/internal/blockchain"
 	"math/big"
-	"strconv"
 
 	"github.com/ethereum/go-ethereum/common"
+
+	"hela-bank-sc/internal/blockchain"
+	"hela-bank-sc/internal/models"
 )
 
 func (s impl) GetBalance(addr common.Address) (*big.Int, error) {
-	return bank.GetBalance(addr)
+	return s.chain.GetBalance(addr)
 }
 
 func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) {
-	txHash, err := bank.Deposit(amount)
+	txHash, amountWei, err := s.chain.Deposit(amount)
 	if err != nil {
 		return common.Hash{}, err
 	}
 
 	err = s.txRepo.Create(ctx,
-		blockchain.FromAddr.Hex(),
+		s.chain.FromAddress(),
 		"deposit",
-		strconv.FormatFloat(amount, 'f', -1, 64),
+		amountWei.String(),
 		txHash.Hex(),
 		"submitted",
 	)
@@ -35,7 +35,7 @@ func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) 
 }
 
 func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error) {
-	txHash, err := bank.Withdraw(amount)
+	txHash, amountWei, err := s.chain.Withdraw(amount)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -43,7 +43,7 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 	err = s.txRepo.Create(ctx,
 		blockchain.FromAddr.Hex(),
 		"withdraw",
-		strconv.FormatFloat(amount, 'f', -1, 64),
+		amountWei.String(),
 		txHash.Hex(),
 		"submitted",
 	)
@@ -55,19 +55,19 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 }
 
 func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
-	contractBalance, err := bank.GetContractBalance()
+	contractBalance, err := s.chain.GetContractBalance()
 	if err != nil {
 		return common.Hash{}, err
 	}
 
-	txHash, err := bank.EmergencyWithdraw()
+	txHash, err := s.chain.EmergencyWithdraw()
 	if err != nil {
 		return common.Hash{}, err
 	}
 
 	err = s.txRepo.Create(ctx,
 		blockchain.FromAddr.Hex(),
-		"emergency withdraw",
+		"emergency_withdraw",
 		contractBalance.String(),
 		txHash.Hex(),
 		"submitted",
@@ -80,5 +80,9 @@ func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 }
 
 func (s impl) GetContractBalance() (*big.Int, error) {
-	return bank.GetContractBalance()
+	return s.chain.GetContractBalance()
+}
+
+func (s impl) GetHistory(ctx context.Context, address string) ([]*models.TransactionHistory, error) {
+	return s.txRepo.ListByAddress(ctx, address)
 }

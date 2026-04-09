@@ -34,5 +34,9 @@ func (rtr Router) Routes() chi.Router {
 
 	r.Get("/contract-balance", handler.GetContractBalance())
 
+	r.Get("/check-health", handler.CheckHealth())
+
+	r.Get("/history/{address}", handler.GetHistory())
+
 	return r
 }
