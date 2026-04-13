@@ -30,7 +30,11 @@ func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
 }
 
 func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
-	auth := txpkg.GetAuth()
+	auth, err := txpkg.GetAuth()
+	if err != nil {
+		return common.Hash{}, nil, err
+	}
+
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
 		big.NewFloat(1e18),
@@ -52,7 +56,11 @@ func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
 }
 
 func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
-	auth := txpkg.GetAuth()
+	auth, err := txpkg.GetAuth()
+	if err != nil {
+		return common.Hash{}, nil, err
+	}
+
 	amount := new(big.Float).Mul(
 		big.NewFloat(amountEther),
 		big.NewFloat(1e18),
@@ -73,7 +81,10 @@ func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
 }
 
 func (g gateway) EmergencyWithdraw() (common.Hash, error) {
-	auth := txpkg.GetAuth()
+	auth, err := txpkg.GetAuth()
+	if err != nil {
+		return common.Hash{}, err
+	}
 
 	data, err := clientpkg.ParsedABI.Pack("emergencyWithdraw")
 	if err != nil {

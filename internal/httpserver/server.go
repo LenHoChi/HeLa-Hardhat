@@ -9,15 +9,23 @@ type Server struct {
 	server *http.Server
 }
 
-func New(addr string, handler http.Handler) *Server {
+type Config struct {
+	Addr              string
+	ReadHeaderTimeout time.Duration
+	ReadTimeout       time.Duration
+	WriteTimeout      time.Duration
+	IdleTimeout       time.Duration
+}
+
+func New(cfg Config, handler http.Handler) *Server {
 	return &Server{
 		server: &http.Server{
-			Addr:              addr,
+			Addr:              cfg.Addr,
 			Handler:           handler,
-			ReadHeaderTimeout: 5 * time.Second,
-			ReadTimeout:       10 * time.Second,
-			WriteTimeout:      10 * time.Second,
-			IdleTimeout:       60 * time.Second,
+			ReadHeaderTimeout: cfg.ReadHeaderTimeout,
+			ReadTimeout:       cfg.ReadTimeout,
+			WriteTimeout:      cfg.WriteTimeout,
+			IdleTimeout:       cfg.IdleTimeout,
 		},
 	}
 }

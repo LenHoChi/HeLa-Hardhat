@@ -2,7 +2,7 @@ package router
 
 import (
 	"context"
-	"hela-bank-sc/internal/handler"
+	handlerbank "hela-bank-sc/internal/handler/bank"
 	"hela-bank-sc/internal/service/bank"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +17,7 @@ type Router struct {
 func (rtr Router) Routes() chi.Router {
 	// at router: create handler to call svc func (that's why need create svc from main and inject them in struct - will use these svc here)
 	// flow: main > router > handler > svc
-	handler := handler.NewBankHandler(rtr.BankSvc)
+	handler := handlerbank.New(rtr.BankSvc)
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)

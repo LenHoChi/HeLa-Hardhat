@@ -2,20 +2,27 @@ package bank
 
 import (
 	"context"
-	"hela-bank-sc/internal/models"
+	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+
+	"hela-bank-sc/internal/domain"
 )
 
 func (s impl) GetBalance(addr common.Address) (*big.Int, error) {
-	return s.chain.GetBalance(addr)
+	balance, err := s.chain.GetBalance(addr)
+	if err != nil {
+		return nil, fmt.Errorf("get balance from blockchain: %w", err)
+	}
+
+	return balance, nil
 }
 
 func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) {
 	txHash, amountWei, err := s.chain.Deposit(amount)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("submit deposit transaction: %w", err)
 	}
 
 	err = s.txRepo.Create(ctx,
@@ -26,7 +33,7 @@ func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) 
 		"submitted",
 	)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("create deposit history: %w", err)
 	}
 
 	return txHash, nil
@@ -35,7 +42,7 @@ func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) 
 func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error) {
 	txHash, amountWei, err := s.chain.Withdraw(amount)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("submit withdraw transaction: %w", err)
 	}
 
 	err = s.txRepo.Create(ctx,
@@ -46,7 +53,7 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 		"submitted",
 	)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("create withdraw history: %w", err)
 	}
 
 	return txHash, nil
@@ -55,12 +62,12 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 	contractBalance, err := s.chain.GetContractBalance()
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("get contract balance before emergency withdraw: %w", err)
 	}
 
 	txHash, err := s.chain.EmergencyWithdraw()
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("submit emergency withdraw transaction: %w", err)
 	}
 
 	err = s.txRepo.Create(ctx,
@@ -71,16 +78,26 @@ func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 		"submitted",
 	)
 	if err != nil {
-		return common.Hash{}, err
+		return common.Hash{}, fmt.Errorf("create emergency withdraw history: %w", err)
 	}
 
 	return txHash, nil
 }
 
 func (s impl) GetContractBalance() (*big.Int, error) {
-	return s.chain.GetContractBalance()
+	balance, err := s.chain.GetContractBalance()
+	if err != nil {
+		return nil, fmt.Errorf("get contract balance from blockchain: %w", err)
+	}
+
+	return balance, nil
 }
 
-func (s impl) GetHistory(ctx context.Context, address string) ([]*models.TransactionHistory, error) {
-	return s.txRepo.ListByAddress(ctx, address)
+func (s impl) GetHistory(ctx context.Context, address string) ([]*domain.History, error) {
+	histories, err := s.txRepo.ListByAddress(ctx, address)
+	if err != nil {
+		return nil, fmt.Errorf("list history by address: %w", err)
+	}
+
+	return histories, nil
 }

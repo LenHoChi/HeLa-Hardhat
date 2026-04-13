@@ -7,9 +7,10 @@ import (
 	clientpkg "hela-bank-sc/internal/blockchain/client"
 	blockchainevent "hela-bank-sc/internal/blockchain/event"
 	txpkg "hela-bank-sc/internal/blockchain/transaction"
+	"hela-bank-sc/internal/config"
 	"hela-bank-sc/internal/database"
 	"hela-bank-sc/internal/httpserver"
-	"hela-bank-sc/internal/repository/transaction"
+	repositorybank "hela-bank-sc/internal/repository/bank"
 	"hela-bank-sc/internal/router"
 	banksvc "hela-bank-sc/internal/service/bank"
 	"log"
@@ -17,11 +18,16 @@ import (
 )
 
 func main() {
-	clientpkg.Init()
+	cfg, err := config.Load()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	clientpkg.Init(cfg)
 	txpkg.InitWallet()
 	fmt.Println("✅ Setup done")
 
-	dbConn, err := database.New()
+	dbConn, err := database.New(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -31,7 +37,7 @@ func main() {
 	ctx := context.Background()
 	go blockchainevent.ListenExplorer(ctx)
 
-	txRepo := transaction.New(dbConn.DB)
+	txRepo := repositorybank.New(dbConn.DB)
 	chainGateway := blockchain.New()
 
 	bankSvc := banksvc.New(txRepo, chainGateway)
@@ -41,7 +47,13 @@ func main() {
 	}
 	r := rtr.Routes()
 
-	srv := httpserver.New(":8080", r)
+	srv := httpserver.New(httpserver.Config{
+		Addr:              ":" + cfg.AppPort,
+		ReadHeaderTimeout: cfg.HTTPReadHeaderTimeout,
+		ReadTimeout:       cfg.HTTPReadTimeout,
+		WriteTimeout:      cfg.HTTPWriteTimeout,
+		IdleTimeout:       cfg.HTTPIdleTimeout,
+	}, r)
 
 	if err := srv.Start(); err != nil && err != http.ErrServerClosed {
 		log.Fatal(err)

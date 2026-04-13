@@ -3,7 +3,6 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"os"
 
 	_ "github.com/lib/pq"
 )
@@ -12,8 +11,7 @@ type Database struct {
 	DB *sql.DB
 }
 
-func New() (*Database, error) {
-	dsn := os.Getenv("DATABASE_URL")
+func New(dsn string) (*Database, error) {
 	if dsn == "" {
 		return nil, fmt.Errorf("DATABASE_URL is required")
 	}

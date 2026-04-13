@@ -2,10 +2,11 @@ package bank
 
 import (
 	"context"
-	"hela-bank-sc/internal/models"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
+
+	"hela-bank-sc/internal/domain"
 )
 
 type Service interface {
@@ -14,5 +15,5 @@ type Service interface {
 	Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 	EmergencyWithdraw(ctx context.Context) (common.Hash, error)
 	GetContractBalance() (*big.Int, error)
-	GetHistory(ctx context.Context, address string) ([]*models.TransactionHistory, error)
+	GetHistory(ctx context.Context, address string) ([]*domain.History, error)
 }

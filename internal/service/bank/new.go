@@ -2,15 +2,15 @@ package bank
 
 import (
 	"hela-bank-sc/internal/blockchain"
-	"hela-bank-sc/internal/repository/transaction"
+	repositorybank "hela-bank-sc/internal/repository/bank"
 )
 
 type impl struct {
-	txRepo transaction.Repository
+	txRepo repositorybank.Repository
 	chain  blockchain.Gateway
 }
 
-func New(txRepo transaction.Repository, chain blockchain.Gateway) Service {
+func New(txRepo repositorybank.Repository, chain blockchain.Gateway) Service {
 	return impl{
 		txRepo: txRepo,
 		chain:  chain,
