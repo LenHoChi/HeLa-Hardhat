@@ -22,6 +22,8 @@ func Init(cfg *config.Config) {
 	Client, err = ethclient.Dial(cfg.HELA_TESTNET_RPC)
 	if err != nil {
 		log.Fatal("Cannot connect to RPC:", err)
+	} else {
+		log.Println("Connected to RPC")
 	}
 
 	abiFile, err := os.ReadFile("abi/bank.json")

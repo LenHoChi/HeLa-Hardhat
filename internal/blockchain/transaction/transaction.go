@@ -31,11 +31,17 @@ func InitWallet() {
 }
 
 func GetAuth() (*bind.TransactOpts, error) {
-	nonce, err := clientpkg.Client.PendingNonceAt(context.Background(), FromAddr)
-	if err != nil {
-		log.Fatal("Cannot get nonce:", err)
+	if clientpkg.Client == nil {
+		return nil, fmt.Errorf("RPC client is not initialized")
 	}
-	gasPrice, err := clientpkg.Client.SuggestGasPrice(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	nonce, err := clientpkg.Client.PendingNonceAt(ctx, FromAddr)
+	if err != nil {
+		return nil, fmt.Errorf("Cannot get nonce: %w", err)
+	}
+	gasPrice, err := clientpkg.Client.SuggestGasPrice(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get gas price: %w", err)
 	}
