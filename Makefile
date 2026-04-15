@@ -6,3 +6,6 @@ migrate-up:
 
 migrate-down:
 	migrate -path internal/migrations -database "$(DATABASE_URL)" down 1
+
+# make: make migrate-down
+# make migrate-up

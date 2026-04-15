@@ -29,6 +29,7 @@ func ListenPolling(ctx context.Context) {
 	latestBlock, err := clientpkg.Client.BlockNumber(ctx)
 	if err != nil {
 		log.Fatal("Cannot get block number:", err)
+		// log.Println("Cannot get block number: ", err)
 	}
 
 	fromBlock := latestBlock

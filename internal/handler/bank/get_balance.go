@@ -15,7 +15,7 @@ func (h Handler) GetBalance() http.HandlerFunc {
 			return
 		}
 		userAddr := common.HexToAddress(address)
-		balance, err := h.bankSvc.GetBalance(userAddr)
+		balance, err := h.bankSvc.GetBalance(r.Context(), userAddr)
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "Cannot get balance")
 			return

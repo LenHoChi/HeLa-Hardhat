@@ -13,12 +13,12 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
+func (g gateway) GetBalance(ctx context.Context, userAddr common.Address) (*big.Int, error) {
 	data, err := clientpkg.ParsedABI.Pack("getBalance", userAddr) // paste address to check balance
 	if err != nil {
 		return nil, err
 	}
-	result, err := clientpkg.Client.CallContract(context.Background(), ethereum.CallMsg{
+	result, err := clientpkg.Client.CallContract(ctx, ethereum.CallMsg{
 		To:   &clientpkg.ContractAddr,
 		Data: data,
 	}, nil)
@@ -29,8 +29,8 @@ func (g gateway) GetBalance(userAddr common.Address) (*big.Int, error) {
 	return balance, nil
 }
 
-func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
-	auth, err := txpkg.GetAuth()
+func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash, *big.Int, error) {
+	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
@@ -55,8 +55,8 @@ func (g gateway) Deposit(amountEther float64) (common.Hash, *big.Int, error) {
 	return tx.Hash(), amountWei, nil
 }
 
-func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
-	auth, err := txpkg.GetAuth()
+func (g gateway) Withdraw(ctx context.Context, amountEther float64) (common.Hash, *big.Int, error) {
+	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
@@ -80,8 +80,8 @@ func (g gateway) Withdraw(amountEther float64) (common.Hash, *big.Int, error) {
 	return tx.Hash(), amountWei, nil
 }
 
-func (g gateway) EmergencyWithdraw() (common.Hash, error) {
-	auth, err := txpkg.GetAuth()
+func (g gateway) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
+	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, err
 	}
@@ -98,8 +98,8 @@ func (g gateway) EmergencyWithdraw() (common.Hash, error) {
 	return tx.Hash(), nil
 }
 
-func (g gateway) GetContractBalance() (*big.Int, error) {
-	balance, err := clientpkg.Client.BalanceAt(context.Background(), clientpkg.ContractAddr, nil)
+func (g gateway) GetContractBalance(ctx context.Context) (*big.Int, error) {
+	balance, err := clientpkg.Client.BalanceAt(ctx, clientpkg.ContractAddr, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -112,7 +112,7 @@ func (g gateway) FromAddress() string {
 
 func PrintBalance(userAddr common.Address) {
 	gw := gateway{}
-	balance, err := gw.GetBalance(userAddr)
+	balance, err := gw.GetBalance(context.Background(), userAddr)
 	if err != nil {
 		log.Println("Cannot get balance:", err)
 		return

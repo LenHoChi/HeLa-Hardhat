@@ -4,7 +4,7 @@ import "net/http"
 
 func (h Handler) GetContractBalance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		balance, err := h.bankSvc.GetContractBalance()
+		balance, err := h.bankSvc.GetContractBalance(r.Context())
 		if err != nil {
 			writeError(w, http.StatusInternalServerError, "Cannot get contract balance")
 			return

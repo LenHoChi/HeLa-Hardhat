@@ -30,11 +30,11 @@ func InitWallet() {
 	FromAddr = crypto.PubkeyToAddress(*publicKey)
 }
 
-func GetAuth() (*bind.TransactOpts, error) {
+func GetAuth(ctx context.Context) (*bind.TransactOpts, error) {
 	if clientpkg.Client == nil {
 		return nil, fmt.Errorf("RPC client is not initialized")
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	nonce, err := clientpkg.Client.PendingNonceAt(ctx, FromAddr)
@@ -58,16 +58,34 @@ func GetAuth() (*bind.TransactOpts, error) {
 func WaitForTx(txHash common.Hash) {
 	fmt.Println("⏳ Waiting for transaction confirm...")
 	for {
-		receipt, err := clientpkg.Client.TransactionReceipt(context.Background(), txHash)
-		if err == nil && receipt != nil {
-			if receipt.Status == 1 {
-				fmt.Println("✅ Transaction confirmed!")
-			} else {
-				fmt.Println("❌ Transaction failed!")
-			}
-			return
+		if clientpkg.Client == nil {
+			log.Printf("RPC client is unavailable while waiting for tx %s", txHash.Hex())
+			time.Sleep(2 * time.Second)
+			continue
 		}
-		time.Sleep(2 * time.Second)
+
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		receipt, err := clientpkg.Client.TransactionReceipt(ctx, txHash)
+		cancel()
+
+		if err != nil {
+			log.Printf("Cannot get receipt for tx %s: %v", txHash.Hex(), err)
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		if receipt == nil {
+			log.Printf("Receipt not available yet for tx %s", txHash.Hex())
+			time.Sleep(2 * time.Second)
+			continue
+		}
+
+		if receipt.Status == 1 {
+			fmt.Println("✅ Transaction confirmed!")
+		} else {
+			fmt.Println("❌ Transaction failed!")
+		}
+		return
 	}
 }
 

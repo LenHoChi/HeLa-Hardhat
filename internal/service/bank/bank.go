@@ -10,8 +10,8 @@ import (
 	"hela-bank-sc/internal/domain"
 )
 
-func (s impl) GetBalance(addr common.Address) (*big.Int, error) {
-	balance, err := s.chain.GetBalance(addr)
+func (s impl) GetBalance(ctx context.Context, addr common.Address) (*big.Int, error) {
+	balance, err := s.chain.GetBalance(ctx, addr)
 	if err != nil {
 		return nil, fmt.Errorf("get balance from blockchain: %w", err)
 	}
@@ -20,7 +20,7 @@ func (s impl) GetBalance(addr common.Address) (*big.Int, error) {
 }
 
 func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) {
-	txHash, amountWei, err := s.chain.Deposit(amount)
+	txHash, amountWei, err := s.chain.Deposit(ctx, amount)
 	if err != nil {
 		return common.Hash{}, fmt.Errorf("submit deposit transaction: %w", err)
 	}
@@ -40,7 +40,7 @@ func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) 
 }
 
 func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error) {
-	txHash, amountWei, err := s.chain.Withdraw(amount)
+	txHash, amountWei, err := s.chain.Withdraw(ctx, amount)
 	if err != nil {
 		return common.Hash{}, fmt.Errorf("submit withdraw transaction: %w", err)
 	}
@@ -60,12 +60,12 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 }
 
 func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
-	contractBalance, err := s.chain.GetContractBalance()
+	contractBalance, err := s.chain.GetContractBalance(ctx)
 	if err != nil {
 		return common.Hash{}, fmt.Errorf("get contract balance before emergency withdraw: %w", err)
 	}
 
-	txHash, err := s.chain.EmergencyWithdraw()
+	txHash, err := s.chain.EmergencyWithdraw(ctx)
 	if err != nil {
 		return common.Hash{}, fmt.Errorf("submit emergency withdraw transaction: %w", err)
 	}
@@ -84,8 +84,8 @@ func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 	return txHash, nil
 }
 
-func (s impl) GetContractBalance() (*big.Int, error) {
-	balance, err := s.chain.GetContractBalance()
+func (s impl) GetContractBalance(ctx context.Context) (*big.Int, error) {
+	balance, err := s.chain.GetContractBalance(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("get contract balance from blockchain: %w", err)
 	}
