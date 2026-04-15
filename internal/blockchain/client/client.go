@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"hela-bank-sc/internal/config"
 	"log"
 	"os"
@@ -36,4 +37,11 @@ func Init(cfg *config.Config) {
 	}
 
 	ContractAddr = common.HexToAddress(cfg.ContractAddress)
+}
+
+func GetClient() (*ethclient.Client, error) {
+	if Client == nil {
+		return nil, fmt.Errorf("RPC client is not initialized")
+	}
+	return Client, nil
 }

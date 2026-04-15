@@ -14,11 +14,16 @@ import (
 )
 
 func (g gateway) GetBalance(ctx context.Context, userAddr common.Address) (*big.Int, error) {
+	client, err := clientpkg.GetClient()
+	if err != nil {
+		return nil, fmt.Errorf("get RPC client: %w", err)
+	}
+
 	data, err := clientpkg.ParsedABI.Pack("getBalance", userAddr) // paste address to check balance
 	if err != nil {
 		return nil, err
 	}
-	result, err := clientpkg.Client.CallContract(ctx, ethereum.CallMsg{
+	result, err := client.CallContract(ctx, ethereum.CallMsg{
 		To:   &clientpkg.ContractAddr,
 		Data: data,
 	}, nil)
@@ -30,6 +35,11 @@ func (g gateway) GetBalance(ctx context.Context, userAddr common.Address) (*big.
 }
 
 func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash, *big.Int, error) {
+	client, err := clientpkg.GetClient()
+	if err != nil {
+		return common.Hash{}, nil, fmt.Errorf("get RPC client: %w", err)
+	}
+
 	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -46,7 +56,7 @@ func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash,
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
-	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, client, client, client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -56,6 +66,11 @@ func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash,
 }
 
 func (g gateway) Withdraw(ctx context.Context, amountEther float64) (common.Hash, *big.Int, error) {
+	client, err := clientpkg.GetClient()
+	if err != nil {
+		return common.Hash{}, nil, fmt.Errorf("get RPC client: %w", err)
+	}
+
 	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -71,7 +86,7 @@ func (g gateway) Withdraw(ctx context.Context, amountEther float64) (common.Hash
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
-	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, client, client, client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, nil, err
@@ -81,6 +96,11 @@ func (g gateway) Withdraw(ctx context.Context, amountEther float64) (common.Hash
 }
 
 func (g gateway) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
+	client, err := clientpkg.GetClient()
+	if err != nil {
+		return common.Hash{}, fmt.Errorf("get RPC client: %w", err)
+	}
+
 	auth, err := txpkg.GetAuth(ctx)
 	if err != nil {
 		return common.Hash{}, err
@@ -90,7 +110,7 @@ func (g gateway) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 	if err != nil {
 		return common.Hash{}, err
 	}
-	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, clientpkg.Client, clientpkg.Client, clientpkg.Client).
+	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, client, client, client).
 		RawTransact(auth, data)
 	if err != nil {
 		return common.Hash{}, err
@@ -99,7 +119,12 @@ func (g gateway) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 }
 
 func (g gateway) GetContractBalance(ctx context.Context) (*big.Int, error) {
-	balance, err := clientpkg.Client.BalanceAt(ctx, clientpkg.ContractAddr, nil)
+	client, err := clientpkg.GetClient()
+	if err != nil {
+		return nil, fmt.Errorf("get RPC client: %w", err)
+	}
+
+	balance, err := client.BalanceAt(ctx, clientpkg.ContractAddr, nil)
 	if err != nil {
 		return nil, err
 	}
