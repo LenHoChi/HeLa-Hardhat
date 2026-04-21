@@ -15,21 +15,33 @@ type Repository struct {
 }
 
 // Create provides a mock function with given fields: ctx, address, action, amount, txHash, status
-func (_m *Repository) Create(ctx context.Context, address string, action string, amount string, txHash string, status string) error {
+func (_m *Repository) Create(ctx context.Context, address string, action string, amount string, txHash string, status string) (*domain.History, error) {
 	ret := _m.Called(ctx, address, action, amount, txHash, status)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Create")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, string) error); ok {
+	var r0 *domain.History
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, string) (*domain.History, error)); ok {
+		return rf(ctx, address, action, amount, txHash, status)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, string, string, string, string, string) *domain.History); ok {
 		r0 = rf(ctx, address, action, amount, txHash, status)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.History)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(context.Context, string, string, string, string, string) error); ok {
+		r1 = rf(ctx, address, action, amount, txHash, status)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ListByAddress provides a mock function with given fields: ctx, address

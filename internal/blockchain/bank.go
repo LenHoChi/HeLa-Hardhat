@@ -40,7 +40,7 @@ func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash,
 		return common.Hash{}, nil, fmt.Errorf("get RPC client: %w", err)
 	}
 
-	auth, err := txpkg.GetAuth(ctx)
+	auth, err := txpkg.GetAuth(ctx) // load private key
 	if err != nil {
 		return common.Hash{}, nil, err
 	}
@@ -57,7 +57,7 @@ func (g gateway) Deposit(ctx context.Context, amountEther float64) (common.Hash,
 		return common.Hash{}, nil, err
 	}
 	tx, err := bind.NewBoundContract(clientpkg.ContractAddr, clientpkg.ParsedABI, client, client, client).
-		RawTransact(auth, data)
+		RawTransact(auth, data) // ký và broadcast
 	if err != nil {
 		return common.Hash{}, nil, err
 	}

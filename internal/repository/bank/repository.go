@@ -22,10 +22,10 @@ func (i impl) Create(
 	amount string,
 	txHash string,
 	status string,
-) error {
+) (*domain.History, error) {
 	amountDecimal, ok := new(decimal.Big).SetString(amount)
 	if !ok {
-		return fmt.Errorf("invalid amount: %s", amount)
+		return nil, fmt.Errorf("invalid amount: %s", amount)
 	}
 
 	record := &models.TransactionHistory{
@@ -37,7 +37,11 @@ func (i impl) Create(
 		CreatedAt: time.Now(),
 	}
 
-	return record.Insert(ctx, i.db, boil.Infer())
+	if err := record.Insert(ctx, i.db, boil.Infer()); err != nil {
+		return nil, err
+	}
+
+	return convert.ToHistory(record), nil
 }
 
 func (i impl) ListByAddress(ctx context.Context, address string) ([]*domain.History, error) {

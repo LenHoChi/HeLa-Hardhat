@@ -69,7 +69,6 @@ func WaitForTx(txHash common.Hash) {
 		cancel()
 
 		if err != nil {
-			log.Printf("Cannot get receipt for tx %s: %v", txHash.Hex(), err)
 			time.Sleep(2 * time.Second)
 			continue
 		}

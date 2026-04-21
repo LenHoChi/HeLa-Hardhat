@@ -25,7 +25,7 @@ func (s impl) Deposit(ctx context.Context, amount float64) (common.Hash, error) 
 		return common.Hash{}, fmt.Errorf("submit deposit transaction: %w", err)
 	}
 
-	err = s.txRepo.Create(ctx,
+	_, err = s.txRepo.Create(ctx,
 		s.chain.FromAddress(),
 		"deposit",
 		amountWei.String(),
@@ -45,7 +45,7 @@ func (s impl) Withdraw(ctx context.Context, amount float64) (common.Hash, error)
 		return common.Hash{}, fmt.Errorf("submit withdraw transaction: %w", err)
 	}
 
-	err = s.txRepo.Create(ctx,
+	_, err = s.txRepo.Create(ctx,
 		s.chain.FromAddress(),
 		"withdraw",
 		amountWei.String(),
@@ -70,7 +70,7 @@ func (s impl) EmergencyWithdraw(ctx context.Context) (common.Hash, error) {
 		return common.Hash{}, fmt.Errorf("submit emergency withdraw transaction: %w", err)
 	}
 
-	err = s.txRepo.Create(ctx,
+	_, err = s.txRepo.Create(ctx,
 		s.chain.FromAddress(),
 		"emergency_withdraw",
 		contractBalance.String(),

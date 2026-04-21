@@ -127,7 +127,7 @@ func TestServiceDeposit(t *testing.T) {
 			if tc.mock.chainErr == nil {
 				chain.On("FromAddress").Return(tc.mock.fromAddress)
 				repo.On("Create", ctx, tc.mock.fromAddress, "deposit", tc.mock.amountWei.String(), tc.mock.txHash.Hex(), "submitted").
-					Return(tc.mock.repoErr)
+					Return((*domain.History)(nil), tc.mock.repoErr)
 			}
 
 			svc := New(repo, chain)
@@ -205,7 +205,7 @@ func TestServiceWithdraw(t *testing.T) {
 			if tc.mock.chainErr == nil {
 				chain.On("FromAddress").Return(tc.mock.fromAddress)
 				repo.On("Create", ctx, tc.mock.fromAddress, "withdraw", tc.mock.amountWei.String(), tc.mock.txHash.Hex(), "submitted").
-					Return(tc.mock.repoErr)
+					Return((*domain.History)(nil), tc.mock.repoErr)
 			}
 
 			svc := New(repo, chain)
@@ -296,7 +296,7 @@ func TestServiceEmergencyWithdraw(t *testing.T) {
 			if tc.mock.balanceErr == nil && tc.mock.withdrawErr == nil {
 				chain.On("FromAddress").Return(tc.mock.fromAddress)
 				repo.On("Create", ctx, tc.mock.fromAddress, "emergency_withdraw", tc.mock.contractBalance.String(), tc.mock.txHash.Hex(), "submitted").
-					Return(tc.mock.repoErr)
+					Return((*domain.History)(nil), tc.mock.repoErr)
 			}
 
 			svc := New(repo, chain)

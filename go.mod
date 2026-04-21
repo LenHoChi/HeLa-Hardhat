@@ -3,6 +3,7 @@ module hela-bank-sc
 go 1.24.5
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.4.1
 	github.com/aarondl/sqlboiler/v4 v4.19.7
 	github.com/aarondl/strmangle v0.0.9
 	github.com/ericlagergren/decimal v0.0.0-20190420051523-6335edbaa640
