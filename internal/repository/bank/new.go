@@ -1,11 +1,13 @@
 package bank
 
-import "database/sql"
+import (
+	"github.com/aarondl/sqlboiler/v4/boil"
+)
 
 type impl struct {
-	db *sql.DB
+	db boil.ContextExecutor
 }
 
-func New(db *sql.DB) Repository {
+func New(db boil.ContextExecutor) Repository {
 	return impl{db: db}
 }

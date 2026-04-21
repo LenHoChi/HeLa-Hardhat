@@ -5,6 +5,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/aarondl/sqlboiler/v4/boil"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/stretchr/testify/require"
@@ -32,17 +33,25 @@ func integrationDB(t *testing.T) *sql.DB {
 	return db
 }
 
-func cleanupTransactionHistories(t *testing.T, db *sql.DB, address string) {
+func integrationTx(t *testing.T) *sql.Tx {
 	t.Helper()
 
-	_, err := db.Exec(`DELETE FROM transaction_histories WHERE address = $1`, address)
+	db := integrationDB(t)
+
+	tx, err := db.Begin()
 	require.NoError(t, err)
+
+	t.Cleanup(func() {
+		_ = tx.Rollback()
+	})
+
+	return tx
 }
 
-func insertHistoryRow(t *testing.T, db *sql.DB, row historyRow) {
+func insertHistoryRow(t *testing.T, exec boil.ContextExecutor, row historyRow) {
 	t.Helper()
 
-	_, err := db.Exec(
+	_, err := exec.Exec(
 		`INSERT INTO transaction_histories (address, action, amount, tx_hash, status, created_at)
 		 VALUES ($1, $2, $3, $4, $5, $6)`,
 		row.address,
@@ -58,3 +67,10 @@ func insertHistoryRow(t *testing.T, db *sql.DB, row historyRow) {
 func testAddress(suffix string) string {
 	return "itest_" + suffix
 }
+
+// func cleanupTransactionHistories(t *testing.T, db *sql.DB, address string) {
+// 	t.Helper()
+
+// 	_, err := db.Exec(`DELETE FROM transaction_histories WHERE address = $1`, address)
+// 	require.NoError(t, err)
+// }

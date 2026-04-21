@@ -36,8 +36,6 @@ func TestRepositoryCreate(t *testing.T) {
 		status  string
 	}
 
-	db := integrationDB(t)
-	repo := New(db)
 	ctx := context.Background()
 
 	tests := []struct {
@@ -81,8 +79,8 @@ func TestRepositoryCreate(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cleanupTransactionHistories(t, db, tc.input.address)
-			t.Cleanup(func() { cleanupTransactionHistories(t, db, tc.input.address) })
+			tx := integrationTx(t)
+			repo := New(tx)
 
 			got, err := repo.Create(ctx, tc.input.address, tc.input.action, tc.input.amount, tc.input.txHash, tc.input.status)
 			if tc.wantErr != "" {
@@ -112,8 +110,6 @@ func TestRepositoryListByAddress(t *testing.T) {
 		rows    []historyRow
 	}
 
-	db := integrationDB(t)
-	repo := New(db)
 	ctx := context.Background()
 
 	now := time.Now().UTC().Truncate(time.Second)
@@ -176,11 +172,11 @@ func TestRepositoryListByAddress(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cleanupTransactionHistories(t, db, tc.mock.address)
-			t.Cleanup(func() { cleanupTransactionHistories(t, db, tc.mock.address) })
+			tx := integrationTx(t)
+			repo := New(tx)
 
 			for _, row := range tc.mock.rows {
-				insertHistoryRow(t, db, row)
+				insertHistoryRow(t, tx, row)
 			}
 
 			got, err := repo.ListByAddress(ctx, tc.mock.address)
