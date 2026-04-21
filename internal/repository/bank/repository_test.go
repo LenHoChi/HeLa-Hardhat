@@ -106,13 +106,11 @@ func TestRepositoryCreate(t *testing.T) {
 
 func TestRepositoryListByAddress(t *testing.T) {
 	type listByAddressMockConfig struct {
-		address string
-		rows    []historyRow
+		address     string
+		fixtureFile string
 	}
 
 	ctx := context.Background()
-
-	now := time.Now().UTC().Truncate(time.Second)
 	tests := []struct {
 		name      string
 		mock      listByAddressMockConfig
@@ -121,25 +119,8 @@ func TestRepositoryListByAddress(t *testing.T) {
 		{
 			name: "success ordered by created_at desc",
 			mock: listByAddressMockConfig{
-				address: testAddress("list-success"),
-				rows: []historyRow{
-					{
-						address:   testAddress("list-success"),
-						action:    "deposit",
-						amount:    "1000000000000000000",
-						txHash:    "0xolder",
-						status:    "submitted",
-						createdAt: now.Add(-1 * time.Minute),
-					},
-					{
-						address:   testAddress("list-success"),
-						action:    "withdraw",
-						amount:    "2000000000000000000",
-						txHash:    "0xnewer",
-						status:    "success",
-						createdAt: now,
-					},
-				},
+				address:     testAddress("list-success"),
+				fixtureFile: "list_by_address_success.sql",
 			},
 			wantItems: []*domain.History{
 				{
@@ -148,7 +129,7 @@ func TestRepositoryListByAddress(t *testing.T) {
 					Amount:    "2000000000000000000",
 					TxHash:    "0xnewer",
 					Status:    "success",
-					CreatedAt: now,
+					CreatedAt: time.Date(2026, 4, 21, 10, 1, 0, 0, time.UTC),
 				},
 				{
 					Address:   testAddress("list-success"),
@@ -156,15 +137,15 @@ func TestRepositoryListByAddress(t *testing.T) {
 					Amount:    "1000000000000000000",
 					TxHash:    "0xolder",
 					Status:    "submitted",
-					CreatedAt: now.Add(-1 * time.Minute),
+					CreatedAt: time.Date(2026, 4, 21, 10, 0, 0, 0, time.UTC),
 				},
 			},
 		},
 		{
 			name: "empty result",
 			mock: listByAddressMockConfig{
-				address: testAddress("list-empty"),
-				rows:    nil,
+				address:     testAddress("list-empty"),
+				fixtureFile: "",
 			},
 			wantItems: []*domain.History{},
 		},
@@ -175,13 +156,23 @@ func TestRepositoryListByAddress(t *testing.T) {
 			tx := integrationTx(t)
 			repo := New(tx)
 
-			for _, row := range tc.mock.rows {
-				insertHistoryRow(t, tx, row)
+			if tc.mock.fixtureFile != "" {
+				loadSQLFixture(t, tx, tc.mock.fixtureFile)
 			}
 
 			got, err := repo.ListByAddress(ctx, tc.mock.address)
 			require.NoError(t, err)
-			require.Equal(t, tc.wantItems, got)
+			// require.Equal(t, tc.wantItems, got)
+			require.Len(t, got, len(tc.wantItems))
+
+			for i := range tc.wantItems {
+				require.Equal(t, tc.wantItems[i].Address, got[i].Address)
+				require.Equal(t, tc.wantItems[i].Action, got[i].Action)
+				require.Equal(t, tc.wantItems[i].Amount, got[i].Amount)
+				require.Equal(t, tc.wantItems[i].TxHash, got[i].TxHash)
+				require.Equal(t, tc.wantItems[i].Status, got[i].Status)
+				require.True(t, tc.wantItems[i].CreatedAt.Equal(got[i].CreatedAt))
+			}
 		})
 	}
 }

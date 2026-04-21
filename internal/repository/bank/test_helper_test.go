@@ -3,6 +3,7 @@ package bank
 import (
 	"database/sql"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/aarondl/sqlboiler/v4/boil"
@@ -14,7 +15,13 @@ import (
 func integrationDB(t *testing.T) *sql.DB {
 	t.Helper()
 
-	_ = godotenv.Load()
+	// if err := godotenv.Load("../../../.env", ".env"); err != nil {
+	// 	t.Logf("load .env: %v", err)
+	// }
+	if err := godotenv.Load("../../../.env"); err != nil {
+		t.Logf("load .env: %v", err)
+	}
+
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
 		t.Skip("DATABASE_URL is not set")
@@ -48,25 +55,37 @@ func integrationTx(t *testing.T) *sql.Tx {
 	return tx
 }
 
-func insertHistoryRow(t *testing.T, exec boil.ContextExecutor, row historyRow) {
+func loadSQLFixture(t *testing.T, exec boil.ContextExecutor, name string) {
 	t.Helper()
 
-	_, err := exec.Exec(
-		`INSERT INTO transaction_histories (address, action, amount, tx_hash, status, created_at)
-		 VALUES ($1, $2, $3, $4, $5, $6)`,
-		row.address,
-		row.action,
-		row.amount,
-		row.txHash,
-		row.status,
-		row.createdAt,
-	)
+	path := filepath.Join("testdata", name)
+
+	sqlBytes, err := os.ReadFile(path)
+	require.NoError(t, err)
+
+	_, err = exec.Exec(string(sqlBytes))
 	require.NoError(t, err)
 }
 
 func testAddress(suffix string) string {
 	return "itest_" + suffix
 }
+
+// func insertHistoryRow(t *testing.T, exec boil.ContextExecutor, row historyRow) {
+// 	t.Helper()
+
+// 	_, err := exec.Exec(
+// 		`INSERT INTO transaction_histories (address, action, amount, tx_hash, status, created_at)
+// 		 VALUES ($1, $2, $3, $4, $5, $6)`,
+// 		row.address,
+// 		row.action,
+// 		row.amount,
+// 		row.txHash,
+// 		row.status,
+// 		row.createdAt,
+// 	)
+// 	require.NoError(t, err)
+// }
 
 // func cleanupTransactionHistories(t *testing.T, db *sql.DB, address string) {
 // 	t.Helper()
