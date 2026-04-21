@@ -18,18 +18,26 @@ func integrationDB(t *testing.T) *sql.DB {
 	// if err := godotenv.Load("../../../.env", ".env"); err != nil {
 	// 	t.Logf("load .env: %v", err)
 	// }
-	if err := godotenv.Load("../../../.env"); err != nil {
+
+	err := godotenv.Load("../../../.env")
+	if err != nil {
 		t.Logf("load .env: %v", err)
 	}
 
+	// err := godotenv.Load()
+
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {
-		t.Skip("DATABASE_URL is not set")
+		t.Logf("load db: %v", err)
+		require.NoError(t, err)
+		// t.Skip("DATABASE_URL is not set")
 	}
 
 	db, err := sql.Open("postgres", dsn)
 	if err != nil {
-		t.Skipf("open database: %v", err)
+		t.Logf("load pq: %v", err)
+		require.NoError(t, err)
+		// t.Skipf("open database: %v", err)
 	}
 	t.Cleanup(func() { _ = db.Close() })
 
