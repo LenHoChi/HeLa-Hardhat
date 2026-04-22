@@ -1,0 +1,9 @@
+.git
+.gitignore
+.vscode
+README.md
+node_modules
+smartcontract/node_modules
+hela-bank-sc
+tmp
+*.log

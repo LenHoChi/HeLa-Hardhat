@@ -53,3 +53,32 @@ test-bank: test-handler test-service test-repo test-router
 
 test-all:
 	GOCACHE=/tmp/hela-bank-sc-go-cache go test ./...
+
+# run docker services (db, migrate , app)
+docker-up:
+	docker compose up --build
+
+docker-up-detached:
+	docker compose up -d --build
+
+# stop all docker services
+docker-down:
+	docker compose down
+
+# run db only
+docker-db-up:
+	docker compose up -d postgres
+
+# wait
+docker-db-wait:
+	until docker compose exec -T postgres pg_isready -U "$(POSTGRES_USER)" -d "$(POSTGRES_DB)"; do sleep 1; done
+
+# run db, wait, mirgate
+setup: docker-db-up docker-db-wait migrate-up
+
+# clear db
+db-clear:
+	docker compose down -v
+
+# clear, re-setup db
+reset: db-clear setup
