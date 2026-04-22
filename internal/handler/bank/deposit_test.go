@@ -112,17 +112,3 @@ func TestHandlerDeposit(t *testing.T) {
 		})
 	}
 }
-
-func assertResponse(t *testing.T, rec *httptest.ResponseRecorder, wantStatus int, wantSuccess bool, wantMessage string) {
-	t.Helper()
-
-	require.Equal(t, wantStatus, rec.Code)
-
-	var resp Response
-	err := json.Unmarshal(rec.Body.Bytes(), &resp)
-	require.NoError(t, err)
-
-	require.Equal(t, wantSuccess, resp.Success)
-
-	require.Equal(t, wantMessage, resp.Message)
-}

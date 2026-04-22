@@ -15,6 +15,8 @@ import (
 func integrationDB(t *testing.T) *sql.DB {
 	t.Helper()
 
+	// err := godotenv.Load()
+
 	// if err := godotenv.Load("../../../.env", ".env"); err != nil {
 	// 	t.Logf("load .env: %v", err)
 	// }
@@ -23,8 +25,6 @@ func integrationDB(t *testing.T) *sql.DB {
 	if err != nil {
 		t.Logf("load .env: %v", err)
 	}
-
-	// err := godotenv.Load()
 
 	dsn := os.Getenv("DATABASE_URL")
 	if dsn == "" {

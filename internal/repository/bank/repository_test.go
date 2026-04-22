@@ -39,11 +39,10 @@ func TestRepositoryCreate(t *testing.T) {
 	ctx := context.Background()
 
 	tests := []struct {
-		name      string
-		input     createInput
-		wantErr   string
-		wantRow   *createExpectedRow
-		wantCount int
+		name    string
+		input   createInput
+		wantErr string
+		wantRow *createExpectedRow
 	}{
 		{
 			name: "success",
@@ -61,7 +60,6 @@ func TestRepositoryCreate(t *testing.T) {
 				txHash:  "0xhash-create-success",
 				status:  "submitted",
 			},
-			wantCount: 1,
 		},
 		{
 			name: "invalid amount",
@@ -72,8 +70,7 @@ func TestRepositoryCreate(t *testing.T) {
 				txHash:  "0xhash-create-invalid",
 				status:  "submitted",
 			},
-			wantErr:   "invalid amount: invalid",
-			wantCount: 0,
+			wantErr: "invalid amount: invalid",
 		},
 	}
 
@@ -162,7 +159,6 @@ func TestRepositoryListByAddress(t *testing.T) {
 
 			got, err := repo.ListByAddress(ctx, tc.mock.address)
 			require.NoError(t, err)
-			// require.Equal(t, tc.wantItems, got)
 			require.Len(t, got, len(tc.wantItems))
 
 			for i := range tc.wantItems {

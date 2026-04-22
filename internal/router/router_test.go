@@ -17,7 +17,6 @@ import (
 
 func TestRouterRoutes(t *testing.T) {
 	type responseBody struct {
-		Success bool   `json:"success"`
 		Message string `json:"message"`
 	}
 

@@ -9,57 +9,119 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type payload struct {
+	Name string `json:"name"`
+}
+
 func TestWriteJSON(t *testing.T) {
-	type payload struct {
-		Name string `json:"name"`
+	tests := []struct {
+		name       string
+		status     int
+		input      payload
+		wantStatus int
+		wantBody   payload
+	}{
+		{
+			name:       "writes json payload",
+			status:     http.StatusCreated,
+			input:      payload{Name: "hela"},
+			wantStatus: http.StatusCreated,
+			wantBody:   payload{Name: "hela"},
+		},
 	}
 
-	rec := httptest.NewRecorder()
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
 
-	writeJSON(rec, http.StatusCreated, payload{Name: "hela"})
+			writeJSON(rec, tc.status, tc.input)
 
-	require.Equal(t, http.StatusCreated, rec.Code)
-	require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+			require.Equal(t, tc.wantStatus, rec.Code)
+			require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
 
-	var got payload
-	err := json.Unmarshal(rec.Body.Bytes(), &got)
-	require.NoError(t, err)
-	require.Equal(t, payload{Name: "hela"}, got)
+			var got payload
+			err := json.Unmarshal(rec.Body.Bytes(), &got)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantBody, got)
+		})
+	}
 }
 
 func TestWriteError(t *testing.T) {
-	rec := httptest.NewRecorder()
+	tests := []struct {
+		name         string
+		status       int
+		message      string
+		wantStatus   int
+		wantResponse Response
+	}{
+		{
+			name:       "writes error response",
+			status:     http.StatusBadRequest,
+			message:    "bad request",
+			wantStatus: http.StatusBadRequest,
+			wantResponse: Response{
+				Success: false,
+				Message: "bad request",
+			},
+		},
+	}
 
-	writeError(rec, http.StatusBadRequest, "bad request")
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
 
-	require.Equal(t, http.StatusBadRequest, rec.Code)
-	require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+			writeError(rec, tc.status, tc.message)
 
-	var got Response
-	err := json.Unmarshal(rec.Body.Bytes(), &got)
-	require.NoError(t, err)
-	require.Equal(t, Response{
-		Success: false,
-		Message: "bad request",
-	}, got)
+			require.Equal(t, tc.wantStatus, rec.Code)
+			require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+
+			var got Response
+			err := json.Unmarshal(rec.Body.Bytes(), &got)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantResponse, got)
+		})
+	}
 }
 
 func TestWriteSuccess(t *testing.T) {
-	rec := httptest.NewRecorder()
+	tests := []struct {
+		name         string
+		status       int
+		message      string
+		data         map[string]string
+		wantStatus   int
+		wantResponse Response
+	}{
+		{
+			name:       "writes success response",
+			status:     http.StatusOK,
+			message:    "ok",
+			data:       map[string]string{"tx_hash": "0x123"},
+			wantStatus: http.StatusOK,
+			wantResponse: Response{
+				Success: true,
+				Message: "ok",
+				Data: map[string]any{
+					"tx_hash": "0x123",
+				},
+			},
+		},
+	}
 
-	writeSuccess(rec, http.StatusOK, "ok", map[string]string{
-		"tx_hash": "0x123",
-	})
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			rec := httptest.NewRecorder()
 
-	require.Equal(t, http.StatusOK, rec.Code)
-	require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+			writeSuccess(rec, tc.status, tc.message, tc.data)
 
-	var got Response
-	err := json.Unmarshal(rec.Body.Bytes(), &got)
-	require.NoError(t, err)
-	require.True(t, got.Success)
-	require.Equal(t, "ok", got.Message)
-	require.Equal(t, map[string]any{
-		"tx_hash": "0x123",
-	}, got.Data)
+			require.Equal(t, tc.wantStatus, rec.Code)
+			require.Equal(t, "application/json", rec.Header().Get("Content-Type"))
+
+			var got Response
+			err := json.Unmarshal(rec.Body.Bytes(), &got)
+			require.NoError(t, err)
+			require.Equal(t, tc.wantResponse, got)
+		})
+	}
 }

@@ -1,7 +1,6 @@
 package bank
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"math/big"
@@ -12,7 +11,6 @@ import (
 	"hela-bank-sc/internal/mocks"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
@@ -109,11 +107,4 @@ func TestHandlerGetBalance(t *testing.T) {
 			}
 		})
 	}
-}
-
-func withURLParam(req *http.Request, key string, value string) *http.Request {
-	routeCtx := chi.NewRouteContext()
-	routeCtx.URLParams.Add(key, value)
-
-	return req.WithContext(context.WithValue(req.Context(), chi.RouteCtxKey, routeCtx))
 }
