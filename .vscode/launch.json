@@ -20,6 +20,24 @@
       "envFile": "${workspaceFolder}/.env"
     },
     {
+      "name": "Debug Handler Tests",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/internal/handler/bank",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
+      "name": "Debug Service Tests",
+      "type": "go",
+      "request": "launch",
+      "mode": "test",
+      "program": "${workspaceFolder}/internal/service/bank",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/.env"
+    },
+    {
       "name": "Debug Repository Tests",
       "type": "go",
       "request": "launch",
