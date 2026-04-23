@@ -20,4 +20,36 @@ export async function getHistory(address) {
   return response.json();
 }
 
+export async function deposit(amount) {
+  const response = await fetch(`${API_BASE_URL}/deposit`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ amount }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export async function withdraw(amount) {
+  const response = await fetch(`${API_BASE_URL}/withdraw`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ amount }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export { API_BASE_URL };

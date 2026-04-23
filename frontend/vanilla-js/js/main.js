@@ -1,8 +1,18 @@
-import { API_BASE_URL, getBalance, getHistory } from "./api.js";
+import {
+  API_BASE_URL,
+  deposit,
+  getBalance,
+  getHistory,
+  withdraw,
+} from "./api.js";
 
 const addressInput = document.querySelector("#address-input");
 const loadBalanceButton = document.querySelector("#load-balance-btn");
 const loadHistoryButton = document.querySelector("#load-history-btn");
+const submitDepositButton = document.querySelector("#submit-deposit-btn");
+const submitWithdrawButton = document.querySelector("#submit-withdraw-btn");
+const depositAmount = document.querySelector("#deposit-amount");
+const withdrawAmount = document.querySelector("#withdraw-amount");
 const resultAddress = document.querySelector("#result-address");
 const resultBalance = document.querySelector("#result-balance");
 const historyResult = document.querySelector("#history-result");
@@ -82,5 +92,45 @@ loadHistoryButton.addEventListener("click", async () => {
   } catch (error) {
     console.error("Cannot load history:", error);
     alert("Cannot load history. Please check the address or backend.");
+  }
+});
+
+submitDepositButton.addEventListener("click", async () => {
+  const amount = Number(depositAmount.value);
+
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid deposit amount.");
+    return;
+  }
+
+  try {
+    console.log("Submitting deposit:", amount);
+    const response = await deposit(amount);
+    console.log("Deposit response:", response);
+
+    alert(response.message ?? "Deposit submitted");
+  } catch (error) {
+    console.error("Cannot deposit:", error);
+    alert("Cannot deposit. Please check the amount or backend.");
+  }
+});
+
+submitWithdrawButton.addEventListener("click", async () => {
+  const amount = Number(withdrawAmount.value);
+
+  if (!amount || amount <= 0) {
+    alert("Please enter a valid withdraw amount.");
+    return;
+  }
+
+  try {
+    console.log("Submitting withdraw:", amount);
+    const response = await withdraw(amount);
+    console.log("Withdraw response:", response);
+
+    alert(response.message ?? "Withdraw submitted");
+  } catch (error) {
+    console.error("Cannot withdraw:", error);
+    alert("Cannot withdraw. Please check the amount or backend.");
   }
 });
