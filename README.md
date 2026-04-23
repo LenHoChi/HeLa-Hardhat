@@ -56,6 +56,10 @@ Step 3
 Step 4
 - Copy the deployed contract address into `CONTRACT_ADDRESS` in `.env`
 
+Step 5
+- Copy the latest ABI from `smartcontract/artifacts/contracts/bank.sol/SimpleBank.json`
+- Update `abi/bank.json` in the root project
+
 ## Prerequisites for Running the Go Backend
 
 - Go `1.24.5`
