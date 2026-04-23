@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hela Bank UI</title>
+    <link rel="stylesheet" href="./css/style.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <h1>Hela Bank Dashboard</h1>
+        <p>Basic vanilla JavaScript UI for the Hela bank backend.</p>
+      </section>
+
+      <section class="grid two-columns">
+        <div class="card">
+          <h2>Lookup Balance</h2>
+          <div class="field">
+            <label for="address-input">Wallet Address</label>
+            <input
+              id="address-input"
+              type="text"
+              placeholder="Enter wallet address"
+            />
+          </div>
+
+          <div class="button-row">
+            <button id="load-balance-btn" type="button">Load Balance</button>
+            <button id="load-history-btn" class="secondary" type="button">
+              Load History
+            </button>
+          </div>
+
+          <div class="result-box" id="balance-result">
+            <p><strong>Address:</strong> <span id="result-address">-</span></p>
+            <p><strong>Balance:</strong> <span id="result-balance">-</span></p>
+            <p class="muted">
+              Click the button to load balance from the backend API.
+            </p>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>System Status</h2>
+          <div class="result-box">
+            <p><strong>Network:</strong> Hela Testnet</p>
+            <p><strong>Backend:</strong> <span class="status">Not checked</span></p>
+            <p><strong>API Base URL:</strong> <span id="api-base-url">-</span></p>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid two-columns" style="margin-top: 16px">
+        <div class="card">
+          <h2>Deposit</h2>
+          <div class="field">
+            <label for="deposit-amount">Amount</label>
+            <input id="deposit-amount" type="number" placeholder="Enter amount" />
+          </div>
+          <button type="button">Submit Deposit</button>
+        </div>
+
+        <div class="card">
+          <h2>Withdraw</h2>
+          <div class="field">
+            <label for="withdraw-amount">Amount</label>
+            <input id="withdraw-amount" type="number" placeholder="Enter amount" />
+          </div>
+          <button type="button">Submit Withdraw</button>
+        </div>
+      </section>
+
+      <section class="card" style="margin-top: 16px">
+        <h2>Transaction History</h2>
+        <div id="history-result" class="result-box">
+          <p class="muted">History will be rendered here later.</p>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="./js/main.js"></script>
+  </body>
+</html>
